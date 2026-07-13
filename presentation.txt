@@ -1,0 +1,60 @@
+Trusta Product Presentation
+
+Hello everyone,
+
+Today I am presenting Trusta, a modern e-commerce platform built around product authenticity, seller trust, and verified buyer experience. Trusta is designed to solve the counterfeit product problem by combining verified inventory, seller validation, and powerful tracking tools into one marketplace.
+
+Key features of Trusta:
+
+1. Public landing experience
+   - Modern homepage with hero messaging, trusted commerce branding, and featured product sections.
+   - Trending verified products and trust messaging that encourages buyer confidence.
+   - Clear product authenticity workflow and platform value proposition.
+
+2. Product catalog and discovery
+   - Browse all products with a responsive grid layout.
+   - Category filtering for electronics, automotive, furniture, appliances, and more.
+   - Full-text search, price filters, verified-only product filtering, and availability filters.
+   - Sorting options such as featured, trending, price, and newest.
+   - Pagination for large product lists.
+
+3. Product detail and verification
+   - Detailed product pages with image gallery, descriptions, specifications, and seller information.
+   - Authenticity verification badge and trust score display.
+   - Serialized inventory tracking and verification status for each unit.
+   - Verified buyer review count and ratings for social proof.
+
+4. Customer experience
+   - Account dashboard for profile management, order history, addresses, and wishlist.
+   - Add-to-cart and checkout flow for seamless purchasing.
+   - Order tracking with status updates and recent order summaries.
+   - Secure authentication and role-based access for customers.
+
+5. Seller experience
+   - Seller registration and onboarding flow with seller-specific signup.
+   - Seller dashboard with revenue, pending orders, inventory alerts, and top products.
+   - Product management for seller inventory, verified listings, and sold counts.
+   - Verification status notices to ensure only approved sellers can list products.
+
+6. Verification and tracking capabilities
+   - NFC verification support for physical product checks.
+   - Unique serial and verification ID generation for items.
+   - Real-time product tracking from manufacture through listing to buyer delivery.
+   - Fraud reporting and protection tools built into the platform.
+
+7. Admin and platform management
+   - Admin dashboard with platform KPIs, total users, sellers, products, pending verifications, and fraud reports.
+   - Seller approval workflow and admin review of pending sellers.
+   - Fraud report management and operational oversight.
+   - Analytics pages for verification performance and platform health.
+
+8. Technology stack
+   - Built with Next.js 16, React 19, and TypeScript.
+   - Tailwind CSS for responsive UI styling.
+   - Supabase backend for database, auth, and admin data access.
+   - JWT session handling, secure auth, and role-based routing.
+   - React Hook Form, Zod validation, Axios, and Lucide icons.
+
+In summary, Trusta is a complete market-ready application focused on authentic commerce. It supports end-to-end product verification, trusted seller onboarding, customer shopping flows, and admin oversight to reduce fraud and build confidence.
+
+Thank you.
