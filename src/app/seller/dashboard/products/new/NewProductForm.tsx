@@ -7,7 +7,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SellerSidebar from '@/components/SellerSidebar';
 import Link from 'next/link';
-import { ArrowLeft, ChevronLeft, ChevronRight, Fingerprint, Loader2, Save } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Fingerprint, Info, Loader2, Save } from 'lucide-react';
+import { sanitizeCode } from '@/lib/verification-id';
 
 type SellerSummary = {
   business_name?: string | null;
@@ -25,6 +26,7 @@ const STEPS = [
 export default function NewProductForm({ seller }: { seller: SellerSummary | null }) {
   const [state, action, pending] = useActionState(createProduct, undefined);
   const [activeStep, setActiveStep] = useState(0);
+  const [modelCode, setModelCode] = useState('');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -86,6 +88,35 @@ export default function NewProductForm({ seller }: { seller: SellerSummary | nul
                       <Field name="brand" label="Brand" required placeholder="Sony" error={state?.errors?.brand?.[0]} />
                       <SelectField name="category" label="Category" error={state?.errors?.category?.[0]} />
                       <Field name="product_id" label="Product ID" placeholder="WB-001" mono error={state?.errors?.product_id?.[0]} />
+
+                      {/* Model Code – used in verification IDs */}
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Model Code <span className="text-red-500">*</span>
+                          <span className="ml-2 text-xs text-gray-400 font-normal">(used in every verification ID for this product)</span>
+                        </label>
+                        <input
+                          name="product_code"
+                          type="text"
+                          required
+                          value={modelCode}
+                          onChange={(e) => setModelCode(sanitizeCode(e.target.value, true))}
+                          placeholder="SNY-XM5"
+                          maxLength={20}
+                          className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-400 transition"
+                        />
+                        {/* Live ID preview */}
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="text-xs text-gray-400">Preview:</span>
+                          <code className="text-xs font-mono text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md">
+                            TRU-{modelCode || '???'}-[VARIANT]-0001-[K7QF]
+                          </code>
+                        </div>
+                        {state?.errors?.product_code && (
+                          <p className="text-red-600 text-xs mt-1">{state.errors.product_code[0]}</p>
+                        )}
+                      </div>
+
                       <div className="md:col-span-2">
                         <TextareaField name="description" label="Product Description" required rows={4} placeholder="Detailed product description..." error={state?.errors?.description?.[0]} />
                       </div>
@@ -142,28 +173,48 @@ export default function NewProductForm({ seller }: { seller: SellerSummary | nul
                   </FormPanel>
 
                   <FormPanel active={activeStep === 4} title="Verification Identity">
-                    <div className="grid lg:grid-cols-[1fr_260px] gap-6 items-start">
-                      <div>
-                        <Field
-                          name="verification_id"
-                          label="Manual Verification ID"
-                          required
-                          placeholder="WB-001"
-                          mono
-                          error={state?.errors?.verification_id?.[0]}
-                        />
-                        <p className="text-xs text-gray-400 mt-2">
-                          For quantity 1, this exact ID is used. For multiple physical units, the system keeps it unique by adding -001, -002, and so on.
-                        </p>
-                      </div>
-                      <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
-                        <Fingerprint className="w-7 h-7 text-blue-600 mb-3" />
-                        <p className="text-gray-900 text-sm font-bold">Identity Output</p>
-                        <p className="text-gray-500 text-xs mt-2">
-                          QR code, barcode, and NFC lookup values are generated from your manual Verification ID.
-                        </p>
+                    {/* Hidden field – no longer used but kept for action compat */}
+                    <input type="hidden" name="verification_id" value={modelCode || 'AUTO'} />
+
+                    <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5 mb-5">
+                      <div className="flex items-start gap-3">
+                        <Fingerprint className="w-8 h-8 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-gray-900 text-sm font-bold mb-1">How Trusta Verification IDs work</p>
+                          <p className="text-gray-600 text-xs leading-relaxed">
+                            Every physical unit gets a unique ID in the format{' '}
+                            <code className="font-mono text-blue-700 bg-blue-100 px-1 py-0.5 rounded">
+                              TRU-{modelCode || 'MODEL'}-VARIANT-0001-K7QF
+                            </code>
+                            . After saving this product, go to each variant and click <strong>"Generate Verification IDs"</strong> to create and download the printed labels.
+                          </p>
+                        </div>
                       </div>
                     </div>
+
+                    <div className="space-y-3">
+                      {[
+                        { step: '1', text: 'Save this product with a Model Code (set in Basic Info above).' },
+                        { step: '2', text: 'Open a variant and enter a short Variant Code (e.g. BLK, 128GB).' },
+                        { step: '3', text: 'Click "Generate Verification IDs" and set the quantity.' },
+                        { step: '4', text: 'Download the CSV / print the table and attach IDs to physical units.' },
+                        { step: '5', text: 'Buyers scan or type their ID on trusta.in/verify to confirm authenticity.' },
+                      ].map(({ step, text }) => (
+                        <div key={step} className="flex items-start gap-3">
+                          <span className="w-6 h-6 rounded-full bg-red-100 text-red-600 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                            {step}
+                          </span>
+                          <p className="text-gray-600 text-sm pt-0.5">{text}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {!modelCode && (
+                      <div className="mt-5 flex items-center gap-2 text-amber-600 bg-amber-50 border border-amber-100 rounded-xl p-3 text-xs">
+                        <Info className="w-4 h-4 flex-shrink-0" />
+                        Go back to <strong>Basic Product Info</strong> and set a Model Code to enable ID generation.
+                      </div>
+                    )}
                   </FormPanel>
 
                   <div className="pt-5 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">

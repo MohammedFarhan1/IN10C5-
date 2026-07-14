@@ -106,17 +106,45 @@ export async function placeOrder(formData: FormData) {
 
   if (orderError || !order) return { success: false, error: 'Failed to create order' };
 
-  // Create order items
-  const items = cart.map((i) => ({
-    order_id: order.id,
-    product_id: (i.product as { id: string }).id,
-    seller_id: (i.product as { seller_id: string }).seller_id,
-    product_name: (i.product as { name: string }).name,
-    product_image: (i.product as { thumbnail: string }).thumbnail,
-    unit_price: (i.product as { price: number }).price,
-    quantity: i.quantity,
-    total: (i.product as { price: number }).price * i.quantity,
-  }));
+  // Create order items, allocating a product_unit for each cart line if available
+  const items: Record<string, unknown>[] = [];
+  for (const i of cart) {
+    const productId  = (i.product as { id: string }).id;
+    const sellerId   = (i.product as { seller_id: string }).seller_id;
+    const unitPrice  = (i.product as { price: number }).price;
+
+    // Try to allocate one available serialized unit for this product
+    let allocatedUnitCode: string | null = null;
+    const { data: availableUnit } = await supabase
+      .from('product_units')
+      .select('id, verification_id')
+      .eq('product_id', productId)
+      .eq('status', 'available')
+      .limit(1)
+      .single();
+
+    if (availableUnit) {
+      // Mark it sold and bind to this buyer
+      await supabase.from('product_units').update({
+        status:   'sold',
+        owner_id: session.userId,
+        updated_at: new Date().toISOString(),
+      }).eq('id', availableUnit.id);
+      allocatedUnitCode = availableUnit.verification_id;
+    }
+
+    items.push({
+      order_id:      order.id,
+      product_id:    productId,
+      seller_id:     sellerId,
+      product_name:  (i.product as { name: string }).name,
+      product_image: (i.product as { thumbnail: string }).thumbnail,
+      unit_price:    unitPrice,
+      quantity:      i.quantity,
+      total:         unitPrice * i.quantity,
+      unit_code:     allocatedUnitCode,
+    });
+  }
 
   await supabase.from('order_items').insert(items);
 

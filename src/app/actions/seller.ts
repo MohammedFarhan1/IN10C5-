@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 const ProductSchema = z.object({
   product_id: z.string().optional(),
+  product_code: z.string().optional(),
   name: z.string().min(2, 'Product name is required'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   brand: z.string().min(1, 'Brand is required'),
@@ -72,6 +73,7 @@ export async function createProduct(state: unknown, formData: FormData) {
 
   const {
     product_id,
+    product_code,
     name,
     description,
     brand,
@@ -100,6 +102,7 @@ export async function createProduct(state: unknown, formData: FormData) {
   try { specs = JSON.parse(specifications || '{}'); } catch {}
 
   const customProductId = product_id?.trim() || null;
+  const sanitizedProductCode = product_code?.trim().toUpperCase().replace(/[^A-Z0-9-]/g, '') || null;
   const verificationIdBase = verification_id.trim().toUpperCase();
   const uniqueMethods = ['qr', 'barcode', 'nfc'];
 
@@ -107,6 +110,7 @@ export async function createProduct(state: unknown, formData: FormData) {
   const { data: product, error } = await supabase.from('products').insert({
     seller_id: session.userId,
     product_id: customProductId,
+    product_code: sanitizedProductCode,
     name,
     description,
     brand,

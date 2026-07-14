@@ -71,6 +71,13 @@ export default function VariantCard({ variant, productId }: { variant: ProductVa
 
           <div className="grid grid-cols-2 gap-3">
             <div>
+              <label className="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Variant Code</label>
+              <input name="variant_code" defaultValue={(variant as any).variant_code || ''} placeholder="BLK"
+                maxLength={8}
+                className={`${miniInputCls} font-mono uppercase`} />
+            </div>
+
+            <div>
               <label className="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Variant ID</label>
               <input name="variant_id" defaultValue={variant.variant_id || ''} placeholder="PROD-RED-XL"
                 className={`${miniInputCls} font-mono`} />
